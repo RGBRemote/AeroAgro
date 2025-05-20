@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"name": "backend",
+			"path": "."
+		},
+		{
+			"path": "../frontend"
+		},
+		{
+			"path": "../test2"
+		}
+	],
+	"settings": {
+		"java.project.sourcePaths": [
+			"frontend"
+		],
+		"liveServer.settings.multiRootWorkspaceName": "frontend",
+		"liveServer.settings.port": 5501
+	}
+}
