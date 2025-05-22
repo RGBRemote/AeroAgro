@@ -2,22 +2,13 @@ import cron from "cron";
 import http from "http";
 import https from "https";
 
-const job = new cron.CronJob("*/14 * * * *", function () {
-  const apiUrl = process.env.API_URL;
-  if (!apiUrl) {
-    console.error("Cron Job Error: API_URL environment variable is not set.");
-    return;
+const job = new cron.CronJob("0 * * * * *", async () => {
+  try {
+    // Example: perform a GET request or any scheduled task
+    // console.log('Cron Job: Running scheduled task');
+  } catch (error) {
+    console.error("Cron Job: GET request failed", error.status || error.message);
   }
-
-  // Determine the correct module based on the protocol
-  const protocol = apiUrl.startsWith('https://') ? https : http;
-
-  protocol
-    .get(apiUrl, (res) => {
-      if (res.statusCode === 200) console.log("Cron Job: GET request sent successfully");
-      else console.log("Cron Job: GET request failed", res.statusCode);
-    })
-    .on("error", (e) => console.error("Cron Job: Error while sending request", e));
 });
 
 export default job;
