@@ -4,18 +4,8 @@ const droneFlightSchema = new mongoose.Schema({
     droneId: {
         type: String,
         required: true,
-        index: true},
-    // },
-    // location: {
-    //     latitude: {
-    //         type: Number,
-    //         required: true
-    //     },
-    //     longitude: {
-    //         type: Number,
-    //         required: true
-    //     }
-    // },
+        index: true
+    },
     startTime: {
         type: Date,
         required: true,
@@ -43,24 +33,18 @@ const droneFlightSchema = new mongoose.Schema({
         },
         timestamp: {
             type: Date,
-            default: Date.now}
-        // },
-        // metadata: {
-        //     altitude: Number,
-        //     heading: Number,
-        //     speed: Number,
-        //     temperature: Number,
-        //     humidity: Number,
-        //     batteryLevel: Number
-        // }
+            default: Date.now
+        },
+        metadata: {
+            altitude: Number,
+            heading: Number,
+            speed: Number,
+            temperature: Number,
+            humidity: Number,
+            batteryLevel: Number
+        }
     }],
-    flightPath: [{
-        latitude: Number,
-        longitude: Number,
-        altitude: Number,
-        timestamp: Date
-    }],
-   
+    notes: String,
     createdAt: {
         type: Date,
         default: Date.now
