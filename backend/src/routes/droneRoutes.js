@@ -1,11 +1,8 @@
 import express from 'express';
-import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
 import DroneFlight from '../models/DroneFlight.js';
 
 const router = express.Router();
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -13,13 +10,18 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+// Start a new drone flight
 router.post('/start', async (req, res) => {
     try {
+        const { droneId } = req.body;
 
-      
+        if (!droneId) {
+            return res.status(400).json({ error: 'Missing droneId' });
+        }
+
         const flight = new DroneFlight({
-            status: 'in-progress',
-            startTime: new Date()
+            droneId,
+            status: 'in-progress'
         });
 
         await flight.save();
@@ -30,15 +32,19 @@ router.post('/start', async (req, res) => {
     }
 });
 
+// End a drone flight
 router.post('/end/:flightId', async (req, res) => {
     try {
         const { flightId } = req.params;
         const flight = await DroneFlight.findById(flightId);
-        if (!flight) return res.status(404).json({ error: 'Flight not found' });
+
+        if (!flight) {
+            return res.status(404).json({ error: 'Flight not found' });
+        }
 
         flight.status = 'completed';
         flight.endTime = new Date();
-        flight.duration = Math.floor((flight.endTime - flight.startTime) / 1000); // in seconds
+        flight.duration = Math.floor((flight.endTime - flight.startTime) / 1000); // Duration in seconds
 
         await flight.save();
         res.json(flight);
@@ -48,54 +54,51 @@ router.post('/end/:flightId', async (req, res) => {
     }
 });
 
-router.post('/upload-image/:flightId', upload.single('file'), async (req, res) => {
+// Upload an image during flight
+router.post('/upload-image/:flightId', async (req, res) => {
     try {
         const { flightId } = req.params;
-        const metadata = JSON.parse(req.body.metadata || '{}');
+        const { image, metadata } = req.body;
 
-        if (!req.file) {
-            return res.status(400).json({ error: 'No file provided' });
+        if (!image) {
+            return res.status(400).json({ error: 'No image provided' });
         }
 
         const flight = await DroneFlight.findById(flightId);
-        if (!flight) return res.status(404).json({ error: 'Flight not found' });
+        if (!flight) {
+            return res.status(404).json({ error: 'Flight not found' });
+        }
 
         // Upload to Cloudinary
-        const result = await new Promise((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-                {
-                    folder: `drone-flights/${flightId}`,
-                    resource_type: 'auto' // auto-detect image, video, etc.
-                },
-                (error, result) => {
-                    if (error) reject(error);
-                    else resolve(result);
-                }
-            );
-            uploadStream.end(req.file.buffer);
+        const result = await cloudinary.uploader.upload(image, {
+            folder: `drone-flights/${flightId}`,
+            resource_type: 'auto'
         });
 
-
+        // Add image to flight record
         flight.images.push({
             url: result.secure_url,
             publicId: result.public_id,
-            metadata
+            metadata: metadata || {}
         });
 
         await flight.save();
         res.json(flight);
     } catch (error) {
-        console.error('Error uploading file:', error);
-        res.status(500).json({ error: 'Failed to upload file' });
+        console.error('Error uploading image:', error);
+        res.status(500).json({ error: 'Failed to upload image' });
     }
 });
 
-// Get all images/files for a flight
+// Get all images for a flight
 router.get('/images/:flightId', async (req, res) => {
     try {
         const { flightId } = req.params;
         const flight = await DroneFlight.findById(flightId);
-        if (!flight) return res.status(404).json({ error: 'Flight not found' });
+
+        if (!flight) {
+            return res.status(404).json({ error: 'Flight not found' });
+        }
 
         res.json(flight.images);
     } catch (error) {
@@ -109,7 +112,7 @@ router.get('/flights', async (req, res) => {
     try {
         const flights = await DroneFlight.find()
             .sort({ startTime: -1 })
-            .select('-images');
+            .select('-images'); // Exclude images from the list view
         res.json(flights);
     } catch (error) {
         console.error('Error fetching flights:', error);
@@ -122,7 +125,10 @@ router.get('/flights/:flightId', async (req, res) => {
     try {
         const { flightId } = req.params;
         const flight = await DroneFlight.findById(flightId);
-        if (!flight) return res.status(404).json({ error: 'Flight not found' });
+
+        if (!flight) {
+            return res.status(404).json({ error: 'Flight not found' });
+        }
 
         res.json(flight);
     } catch (error) {
@@ -130,30 +136,5 @@ router.get('/flights/:flightId', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch flight' });
     }
 });
-
-// Update flight path
-// router.post('/update-path/:flightId', async (req, res) => {
-//     try {
-//         const { flightId } = req.params;
-
-
-//         if (!latitude || !longitude || !altitude) {
-//             return res.status(400).json({ error: 'Missing required fields' });
-//         }
-
-//         const flight = await DroneFlight.findById(flightId);
-//         if (!flight) return res.status(404).json({ error: 'Flight not found' });
-
-//         flight.flightPath.push({
-//             timestamp: new Date()
-//         });
-
-//         await flight.save();
-//         res.json(flight);
-//     } catch (error) {
-//         console.error('Error updating flight path:', error);
-//         res.status(500).json({ error: 'Failed to update flight path' });
-//     }
-// });
 
 export default router;
