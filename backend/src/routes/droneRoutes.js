@@ -13,17 +13,11 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// Start a flight
 router.post('/start', async (req, res) => {
     try {
-        const { droneId, latitude, longitude } = req.body;
-        if (!droneId || !latitude || !longitude) {
-            return res.status(400).json({ error: 'Missing required fields' });
-        }
 
+      
         const flight = new DroneFlight({
-            droneId,
-            location: { latitude, longitude },
             status: 'in-progress',
             startTime: new Date()
         });
@@ -36,7 +30,6 @@ router.post('/start', async (req, res) => {
     }
 });
 
-// End a flight
 router.post('/end/:flightId', async (req, res) => {
     try {
         const { flightId } = req.params;
@@ -55,7 +48,6 @@ router.post('/end/:flightId', async (req, res) => {
     }
 });
 
-// Upload any file during flight (image/video/etc.)
 router.post('/upload-image/:flightId', upload.single('file'), async (req, res) => {
     try {
         const { flightId } = req.params;
@@ -83,7 +75,7 @@ router.post('/upload-image/:flightId', upload.single('file'), async (req, res) =
             uploadStream.end(req.file.buffer);
         });
 
-        // Save image metadata to flight
+
         flight.images.push({
             url: result.secure_url,
             publicId: result.public_id,
@@ -140,31 +132,28 @@ router.get('/flights/:flightId', async (req, res) => {
 });
 
 // Update flight path
-router.post('/update-path/:flightId', async (req, res) => {
-    try {
-        const { flightId } = req.params;
-        const { latitude, longitude, altitude } = req.body;
+// router.post('/update-path/:flightId', async (req, res) => {
+//     try {
+//         const { flightId } = req.params;
 
-        if (!latitude || !longitude || !altitude) {
-            return res.status(400).json({ error: 'Missing required fields' });
-        }
 
-        const flight = await DroneFlight.findById(flightId);
-        if (!flight) return res.status(404).json({ error: 'Flight not found' });
+//         if (!latitude || !longitude || !altitude) {
+//             return res.status(400).json({ error: 'Missing required fields' });
+//         }
 
-        flight.flightPath.push({
-            latitude,
-            longitude,
-            altitude,
-            timestamp: new Date()
-        });
+//         const flight = await DroneFlight.findById(flightId);
+//         if (!flight) return res.status(404).json({ error: 'Flight not found' });
 
-        await flight.save();
-        res.json(flight);
-    } catch (error) {
-        console.error('Error updating flight path:', error);
-        res.status(500).json({ error: 'Failed to update flight path' });
-    }
-});
+//         flight.flightPath.push({
+//             timestamp: new Date()
+//         });
+
+//         await flight.save();
+//         res.json(flight);
+//     } catch (error) {
+//         console.error('Error updating flight path:', error);
+//         res.status(500).json({ error: 'Failed to update flight path' });
+//     }
+// });
 
 export default router;
