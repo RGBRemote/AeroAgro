@@ -1,6 +1,5 @@
 import express from "express";
-import cors from "cors";
-import "dotenv/config";
+import "dotenv/config.js";
 import job from "./lib/cron.js";
 
 import authRoutes from "./routes/authRoutes.js";
@@ -12,17 +11,27 @@ import { connectDB } from "./lib/db.js";
 const app = express();
 const PORT = process.env.PORT || 3002;
 
-// CORS configuration
-const corsOptions = {
-    origin: ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5500', 'http://127.0.0.1:5500'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
-};
-
-app.use(cors(corsOptions));
-app.use(express.json({ limit: '50mb' })); // Increased limit for image uploads
+// Parse JSON bodies
+app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Add CORS headers middleware
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+    next();
+});
+
+// Routes
+app.use("/api/auth", authRoutes);
+app.use("/api", imageRoutes);
+app.use("/api/drone", droneRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -33,10 +42,6 @@ app.use((err, req, res, next) => {
         error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
 });
-
-app.use("/api/auth", authRoutes);
-app.use("/api", imageRoutes);
-app.use("/api/drone", droneRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

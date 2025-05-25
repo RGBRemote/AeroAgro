@@ -35,13 +35,20 @@ const droneFlightSchema = new mongoose.Schema({
             type: Date,
             default: Date.now
         },
+        heatMapUrl: {
+            type: String,
+            required: true
+        },
+        heatMapPublicId: {
+            type: String,
+            required: true
+        },
         metadata: {
-            altitude: Number,
-            heading: Number,
-            speed: Number,
-            temperature: Number,
-            humidity: Number,
-            batteryLevel: Number
+            analysis: String,
+            temperatureRange: {
+                min: Number,
+                max: Number
+            }
         }
     }],
     notes: String,
@@ -57,7 +64,7 @@ const droneFlightSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Index for faster queries
+
 droneFlightSchema.index({ startTime: -1 });
 droneFlightSchema.index({ status: 1 });
 droneFlightSchema.index({ 'images.timestamp': -1 });

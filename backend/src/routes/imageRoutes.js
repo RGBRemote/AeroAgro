@@ -6,14 +6,13 @@ dotenv.config();
 
 const router = express.Router();
 
-// Configure Cloudinary
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// Test route to verify Cloudinary configuration
+
 router.get('/test', async (req, res) => {
     console.log('Testing Cloudinary configuration...');
     console.log('Environment variables loaded:', {
@@ -23,7 +22,7 @@ router.get('/test', async (req, res) => {
     });
 
     try {
-        // Test Cloudinary connection
+        
         const result = await cloudinary.api.ping();
         console.log('Cloudinary ping result:', result);
 
@@ -53,17 +52,15 @@ router.get('/test', async (req, res) => {
 });
 
 router.get('/images', async (req, res) => {
-    console.log('Fetching images from Cloudinary...');
-    try {
-        // Verify Cloudinary configuration
+    try 
+    {
         if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
             console.error('Cloudinary configuration is missing');
             throw new Error('Cloudinary configuration is missing');
         }
-
         console.log('Cloudinary config verified, searching for images...');
         const result = await cloudinary.search
-            .expression('resource_type:image') // Search for all images
+            .expression('resource_type:image') 
             .sort_by('created_at', 'desc')
             .max_results(30)
             .execute();

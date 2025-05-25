@@ -1,39 +1,78 @@
-import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
-const userSchema = new mongoose.Schema(
-  {
-    username: {
-      type: String,
-      required: true,
-      unique: true,
+const userSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
+        trim: true
     },
     email: {
-      type: String,
-      required: true,
-      unique: true,
+        type: String,
+        required: true,
+        unique: true,
+        trim: true,
+        lowercase: true
     },
     password: {
-      type: String,
-      required: true,
-      minlength: 6,
+        type: String,
+        required: true
     },
-    
-  },
-  { timestamps: true }
-);
-
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-
-  next();
+    droneId: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true
+    },
+    role: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user'
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+}, {
+    timestamps: true
 });
 
-userSchema.methods.comparePassword = async function (userPassword) {
-  return await bcrypt.compare(userPassword, this.password);
+// Remove any existing indexes
+userSchema.index({ username: 1 }, { unique: false });
+
+userSchema.pre("save", async function (next) {
+    if (!this.isModified("password")) return next();
+
+    try {
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password, salt);
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
+
+userSchema.methods.comparePassword = async function (candidatePassword) {
+    return bcrypt.compare(candidatePassword, this.password);
 };
-const User = mongoose.model("User", userSchema);
+
+userSchema.statics.generateDroneId = async function() {
+    const prefix = 'DRN';
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const droneId = `${prefix}${timestamp}${random}`;
+    
+    const existingUser = await this.findOne({ droneId });
+    if (existingUser) {
+        return this.generateDroneId();
+    }
+    
+    return droneId;
+};
+
+const User = mongoose.model('User', userSchema);
+
+// Drop the username index if it exists
+User.collection.dropIndex('username_1').catch(() => {});
+
 export default User;
