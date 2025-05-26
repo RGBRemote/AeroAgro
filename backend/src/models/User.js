@@ -72,7 +72,6 @@ userSchema.statics.generateDroneId = async function() {
 
 const User = mongoose.model('User', userSchema);
 
-// Drop the username index if it exists
 User.collection.dropIndex('username_1').catch(() => {});
 
 export default User;
