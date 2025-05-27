@@ -8,12 +8,12 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // OpenWeatherMap API configuration
+
     const OPENWEATHER_API_KEY = 'a031a0406b7be30ff4f60682fc8c5340';
     let userLocation = null;
     let isUsingFallbackData = false;
 
-    // Function to get user's current location
+
     function getUserLocation() {
         return new Promise((resolve, reject) => {
             if (navigator.geolocation) {
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     (error) => {
                         console.error('Error getting location:', error);
-                        // Default to a fallback location if geolocation fails
+                      
                         userLocation = {
                             lat: 12.9716,  // Default to Bangalore coordinates
                             lon: 77.5946
@@ -39,9 +39,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 );
             } else {
                 console.error('Geolocation is not supported by this browser.');
-                // Default to a fallback location
+                
                 userLocation = {
-                    lat: 12.9716,  // Default to Bangalore coordinates
+                    lat: 12.9716,  
                     lon: 77.5946
                 };
                 console.log('Using fallback location:', userLocation);
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Function to fetch weather data
+    
     async function fetchWeatherData(date = null) {
         try {
             if (!userLocation) {
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Weather API Response:', data);
             isUsingFallbackData = false;
             
-            // Process the weather data
+          
             const weatherData = {
                 data: [{
                     temp: data.main.temp,
@@ -94,7 +94,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error fetching weather data:', error);
             isUsingFallbackData = true;
-            // Return fallback weather data on error
             return {
                 data: [{
                     temp: 28,
@@ -122,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const weather = weatherData.data[0];
             const temp = Math.round(weather.temp);
             const tempMin = Math.round(weather.temp_min);
-            const tempMax = Math.round(weather.temp_max);
+            const tempMax = Math.round(weather.temp_max)+1;
             const avgTemp = Math.round((tempMin + tempMax) / 2);
             const windSpeed = Math.round(weather.wind_speed * 3.6); // Convert m/s to km/h
             const humidity = weather.humidity;
@@ -143,11 +142,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="weather-details">
                             <p><i class="fas fa-wind"></i> Wind: ${windSpeed} km/h</p>
                             <p><i class="fas fa-tint"></i> Humidity: ${humidity}%</p>
-                            <p><i class="fas fa-cloud"></i> ${description}</p>
+                            <p><i class="fas fa-temperature-high"></i> High: ${tempMax}°C</p>
                         </div>
                         <div class="weather-forecast">
-                            <p><i class="fas fa-temperature-high"></i> Temperature Range: ${tempMin}°C - ${tempMax}°C</p>
+                        
                             <p><i class="fas fa-thermometer-half"></i> Average Temperature: ${avgTemp}°C</p>
+                            <p><i class="fas fa-thermometer-half"></i> ${description} </p>
                         </div>
                     </div>
                 `;
@@ -169,11 +169,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="weather-details">
                             <p><i class="fas fa-wind"></i> Wind: -- km/h</p>
                             <p><i class="fas fa-tint"></i> Humidity: --%</p>
-                            <p><i class="fas fa-cloud"></i> Unknown</p>
+                            <p><i class="fas fa-temperature-high"></i> High: --°C</p>
                         </div>
                         <div class="weather-forecast">
-                            <p><i class="fas fa-temperature-high"></i> Temperature Range: --°C - --°C</p>
-                            <p><i class="fas fa-thermometer-half"></i> Average Temperature: --°C</p>
+                            <p><i class="fas fa-temperature-low"></i> Low: --°C</p>
+                            <p><i class="fas fa-thermometer-half"></i> Average: --°C</p>
                         </div>
                     </div>
                 `;
