@@ -1,0 +1,186 @@
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #388E3C;
+    --light-color: #F1F8E9;
+    --dark-color: #2E7D32;
+    --text-color: #333;
+    --white: #fff;
+    --error-color: #dc3545;
+    --success-color: #28a745;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: #f9f9f9;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+}
+
+.auth-card {
+    background: var(--white);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    padding: 30px;
+    text-align: center;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+.logo i {
+    margin-right: 10px;
+}
+
+h2 {
+    color: var(--dark-color);
+    margin-bottom: 20px;
+}
+
+.auth-form {
+    text-align: left;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.auth-button {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.auth-button:hover {
+    background-color: var(--secondary-color);
+}
+
+.auth-link {
+    margin-top: 20px;
+    color: var(--text-color);
+}
+
+.auth-link a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-link a:hover {
+    text-decoration: underline;
+}
+
+.error-message {
+    color: var(--error-color);
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.success-message {
+    color: var(--success-color);
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.drone-id-container {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: var(--light-color);
+    border-radius: 5px;
+    text-align: center;
+}
+
+.drone-id-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 10px 0;
+    padding: 10px;
+    background-color: var(--white);
+    border: 1px solid var(--primary-color);
+    border-radius: 5px;
+}
+
+#drone-id-display {
+    font-family: monospace;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--dark-color);
+}
+
+.copy-button {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.3s ease;
+}
+
+.copy-button:hover {
+    color: var(--dark-color);
+}
+
+.drone-id-note {
+    font-size: 12px;
+    color: var(--text-color);
+    margin-top: 10px;
+}
+
+@media (max-width: 480px) {
+    .auth-container {
+        padding: 10px;
+    }
+
+    .auth-card {
+        padding: 20px;
+    }
+} 

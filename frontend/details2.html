@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriScan Mobile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2E7D32;
+            --primary-light: #81C784;
+            --secondary: #FF8F00;
+            --dark: #263238;
+            --light: #f8f9fa;
+            --gray: #607D8B;
+            --white: #ffffff;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 20px;
+        }
+        
+        .app-container {
+            max-width: 100%;
+            padding: 0 12px;
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 18px 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .app-title {
+            font-weight: 600;
+            font-size: 20px;
+        }
+        
+        .analysis-block {
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .analysis-block:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+        
+        .image-viewer {
+            position: relative;
+            width: 100%;
+            height: 220px;
+            overflow: hidden;
+        }
+        
+        .analysis-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.3s ease;
+        }
+        
+        .image-controls {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            background: rgba(255,255,255,0.9);
+            border-radius: 24px;
+            padding: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        
+        .image-toggle {
+            border: none;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            background: transparent;
+            color: var(--gray);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .image-toggle.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .analysis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            cursor: pointer;
+        }
+        
+        .analysis-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--dark);
+        }
+        
+        .analysis-status {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #E8F5E9;
+            color: var(--primary);
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+        
+        .toggle-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ECEFF1;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+        
+        .analysis-content {
+            max-height: 0;
+            overflow: hidden;
+            padding: 0 16px;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+        }
+        
+        .analysis-content.expanded {
+            max-height: 500px;
+            padding: 0 16px 16px;
+        }
+        
+        .analysis-metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        
+        .metric {
+            background: #ECEFF1;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .metric-value {
+            font-weight: 600;
+            margin-left: 4px;
+            color: var(--primary);
+        }
+        
+        .analysis-text {
+            font-size: 14px;
+            color: var(--gray);
+            margin-bottom: 12px;
+        }
+        
+        .analysis-footer {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #90A4AE;
+            padding-top: 8px;
+            border-top: 1px solid #ECEFF1;
+        }
+        
+        /* Animation for image switch */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <div class="app-title">Field Analysis</div>
+    </div>
+    
+    <div class="app-container">
+        <!-- Analysis Block 1 -->
+        <div class="analysis-block">
+            <div class="image-viewer">
+                <!-- Normal Image -->
+                <img src="https://images.unsplash.com/photo-1605000797499-95a51c5269ae?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+                     alt="Crop View"
+                     class="analysis-image active"
+                     data-type="normal">
+                
+                <!-- Heatmap Image -->
+                <img src="https://images.unsplash.com/photo-1586771107445-d3ca888129ce?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+                     alt="Heatmap"
+                     class="analysis-image"
+                     data-type="heatmap"
+                     style="display: none; opacity: 0;">
+                
+                <div class="image-controls">
+                    <button class="image-toggle active" data-target="normal">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-right:4px;">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor"/>
+                            <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" fill="currentColor"/>
+                        </svg>
+                        Normal
+                    </button>
+                    <button class="image-toggle" data-target="heatmap">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-right:4px;">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor"/>
+                            <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" fill="currentColor"/>
+                            <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" fill="currentColor"/>
+                        </svg>
+                        Heatmap
+                    </button>
+                </div>
+            </div>
+            
+            <div class="analysis-header" onclick="toggleAnalysis(this)">
+                <div>
+                    <span class="analysis-title">Wheat Field Analysis</span>
+                    <span class="analysis-status">Healthy</span>
+                </div>
+                <div class="toggle-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--gray)">
+                        <path d="M7 10l5 5 5-5z"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <div class="analysis-content">
+                <div class="analysis-metrics">
+                    <div class="metric">NDVI <span class="metric-value">0.78</span></div>
+                    <div class="metric">Moisture <span class="metric-value">68%</span></div>
+                    <div class="metric">Health <span class="metric-value">92%</span></div>
+                </div>
+                
+                <p class="analysis-text">The wheat field shows excellent health with uniform growth pattern. Minor stress detected in northeast corner (NDVI 0.65).</p>
+                
+                <div class="analysis-footer">
+                    <span>Field A • North Section</span>
+                    <span>Today 10:30 AM</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Analysis Block 2 -->
+        <div class="analysis-block">
+            <div class="image-viewer">
+                <!-- Normal Image -->
+                <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+                     alt="Crop View"
+                     class="analysis-image active"
+                     data-type="normal">
+                
+                <!-- Heatmap Image -->
+                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+                     alt="Heatmap"
+                     class="analysis-image"
+                     data-type="heatmap"
+                     style="display: none; opacity: 0;">
+                
+                <div class="image-controls">
+                    <button class="image-toggle active" data-target="normal">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-right:4px;">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor"/>
+                            <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" fill="currentColor"/>
+                        </svg>
+                        Normal
+                    </button>
+                    <button class="image-toggle" data-target="heatmap">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-right:4px;">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor"/>
+                            <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" fill="currentColor"/>
+                            <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" fill="currentColor"/>
+                        </svg>
+                        Heatmap
+                    </button>
+                </div>
+            </div>
+            
+            <div class="analysis-header" onclick="toggleAnalysis(this)">
+                <div>
+                    <span class="analysis-title">Corn Growth Stage</span>
+                    <span class="analysis-status" style="background:#FFF3E0;color:#EF6C00;">Moderate</span>
+                </div>
+                <div class="toggle-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--gray)">
+                        <path d="M7 10l5 5 5-5z"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <div class="analysis-content">
+                <div class="analysis-metrics">
+                    <div class="metric">Growth Stage <span class="metric-value">V6</span></div>
+                    <div class="metric">Canopy Cover <span class="metric-value">72%</span></div>
+                    <div class="metric">Temp <span class="metric-value">24°C</span></div>
+                </div>
+                
+                <p class="analysis-text">Corn is progressing well with 85% at V6 stage. Western section shows slower growth (V4). Recommend nutrient check.</p>
+                
+                <div class="analysis-footer">
+                    <span>Field B • South Section</span>
+                    <span>Yesterday 2:15 PM</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle between normal and heatmap images with animation
+        document.querySelectorAll('.image-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const viewer = this.closest('.image-viewer');
+                const targetType = this.dataset.target;
+                
+                // Update active toggle styling
+                this.closest('.image-controls').querySelectorAll('.image-toggle').forEach(t => {
+                    t.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // Animate image transition
+                viewer.querySelectorAll('.analysis-image').forEach(img => {
+                    if (img.dataset.type === targetType) {
+                        img.style.display = 'block';
+                        setTimeout(() => {
+                            img.style.opacity = '1';
+                            img.classList.add('fade-in');
+                        }, 10);
+                    } else {
+                        img.style.opacity = '0';
+                        setTimeout(() => {
+                            img.style.display = 'none';
+                            img.classList.remove('fade-in');
+                        }, 300);
+                    }
+                });
+            });
+        });
+        
+        // Toggle analysis content with animation
+        function toggleAnalysis(header) {
+            const block = header.closest('.analysis-block');
+            const content = block.querySelector('.analysis-content');
+            const icon = block.querySelector('.toggle-icon svg');
+            
+            content.classList.toggle('expanded');
+            
+            if (content.classList.contains('expanded')) {
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+        
+        // Initialize - close all analysis sections by default
+        document.querySelectorAll('.analysis-content').forEach(content => {
+            content.style.maxHeight = '0';
+        });
+    </script>
+</body>
+</html>
